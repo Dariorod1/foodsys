@@ -1,6 +1,17 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+// Configuración automática de la URL de la API
+const getApiUrl = () => {
+  // En desarrollo
+  if (import.meta.env.DEV) {
+    return 'http://localhost:5000/api';
+  }
+  
+  // En producción, usar variable de entorno o URL por defecto
+  return import.meta.env.VITE_API_URL || 'https://tu-backend.railway.app/api';
+};
+
+const API_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_URL,
