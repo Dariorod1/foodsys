@@ -1,0 +1,16 @@
+{
+  "mesaId": 1,
+  "metodoPago": "Efectivo",
+  "esParaLlevar": false,
+  "notas": "Pedido de prueba",
+  "articulos": [
+    {
+      "productoId": 1,
+      "cantidad": 2
+    },
+    {
+      "productoId": 2,
+      "cantidad": 1
+    }
+  ]
+}
