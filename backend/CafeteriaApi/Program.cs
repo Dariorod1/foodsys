@@ -80,7 +80,8 @@ var allowedOrigins = new List<string>
 {
     "http://localhost:5173",
     "http://localhost:3000",
-    "http://localhost:5174"
+    "http://localhost:5174",
+    "https://foodsys.vercel.app"
 };
 
 // Add production frontend URL if in production
