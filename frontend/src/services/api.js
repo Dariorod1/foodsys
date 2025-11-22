@@ -8,7 +8,7 @@ const getApiUrl = () => {
   }
   
   // En producción, usar variable de entorno o URL por defecto
-  return import.meta.env.VITE_API_URL || 'https://tu-backend.railway.app/api';
+  return import.meta.env.VITE_API_URL || 'https://foodsys-production.up.railway.app/api';
 };
 
 const API_URL = getApiUrl();
