@@ -24,9 +24,9 @@ namespace CafeteriaApi.Services
 
         public async Task<ReporteVentasDto> ObtenerReporteVentasAsync(DateTime fechaInicio, DateTime fechaFin)
         {
-            // Ajustar fechas para incluir todo el día
-            var inicio = fechaInicio.Date;
-            var fin = fechaFin.Date.AddDays(1);
+            // Ajustar fechas para incluir todo el día con UTC para PostgreSQL
+            var inicio = DateTime.SpecifyKind(fechaInicio.Date, DateTimeKind.Utc);
+            var fin = DateTime.SpecifyKind(fechaFin.Date.AddDays(1), DateTimeKind.Utc);
 
             var pedidos = await _context.Pedidos
                 .Where(p => p.FechaPedido >= inicio && p.FechaPedido < fin && p.Estado == "Completado")
@@ -57,8 +57,8 @@ namespace CafeteriaApi.Services
 
         public async Task<List<VentaPorProductoDto>> ObtenerProductosMasVendidosAsync(DateTime fechaInicio, DateTime fechaFin, int cantidad = 10)
         {
-            var inicio = fechaInicio.Date;
-            var fin = fechaFin.Date.AddDays(1);
+            var inicio = DateTime.SpecifyKind(fechaInicio.Date, DateTimeKind.Utc);
+            var fin = DateTime.SpecifyKind(fechaFin.Date.AddDays(1), DateTimeKind.Utc);
 
             var productos = await _context.ItemsPedidos
                 .Where(i => i.Pedido.FechaPedido >= inicio && i.Pedido.FechaPedido < fin && i.Pedido.Estado == "Completado")
@@ -80,11 +80,15 @@ namespace CafeteriaApi.Services
 
         public async Task<List<VentaPorDiaDto>> ObtenerVentasPorDiaAsync(DateTime fechaInicio, DateTime fechaFin)
         {
-            var inicio = fechaInicio.Date;
-            var fin = fechaFin.Date.AddDays(1);
+            var inicio = DateTime.SpecifyKind(fechaInicio.Date, DateTimeKind.Utc);
+            var fin = DateTime.SpecifyKind(fechaFin.Date.AddDays(1), DateTimeKind.Utc);
 
-            var ventasPorDia = await _context.Pedidos
+            // Obtener los datos y agrupar en memoria para evitar problemas con .Date en PostgreSQL
+            var pedidos = await _context.Pedidos
                 .Where(p => p.FechaPedido >= inicio && p.FechaPedido < fin && p.Estado == "Completado")
+                .ToListAsync();
+
+            var ventasPorDia = pedidos
                 .GroupBy(p => p.FechaPedido.Date)
                 .OrderBy(g => g.Key)
                 .Select(g => new VentaPorDiaDto
@@ -93,15 +97,15 @@ namespace CafeteriaApi.Services
                     TotalPedidos = g.Count(),
                     MontoTotal = g.Sum(p => p.MontoTotal)
                 })
-                .ToListAsync();
+                .ToList();
 
             return ventasPorDia;
         }
 
         public async Task<decimal> ObtenerIngresoTotalAsync(DateTime fechaInicio, DateTime fechaFin)
         {
-            var inicio = fechaInicio.Date;
-            var fin = fechaFin.Date.AddDays(1);
+            var inicio = DateTime.SpecifyKind(fechaInicio.Date, DateTimeKind.Utc);
+            var fin = DateTime.SpecifyKind(fechaFin.Date.AddDays(1), DateTimeKind.Utc);
 
             var montoTotal = await _context.Pedidos
                 .Where(p => p.FechaPedido >= inicio && p.FechaPedido < fin && p.Estado == "Completado")
@@ -112,8 +116,8 @@ namespace CafeteriaApi.Services
 
         public async Task<decimal> ObtenerPromedioVentaAsync(DateTime fechaInicio, DateTime fechaFin)
         {
-            var inicio = fechaInicio.Date;
-            var fin = fechaFin.Date.AddDays(1);
+            var inicio = DateTime.SpecifyKind(fechaInicio.Date, DateTimeKind.Utc);
+            var fin = DateTime.SpecifyKind(fechaFin.Date.AddDays(1), DateTimeKind.Utc);
 
             var promedio = await _context.Pedidos
                 .Where(p => p.FechaPedido >= inicio && p.FechaPedido < fin && p.Estado == "Completado")

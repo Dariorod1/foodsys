@@ -64,7 +64,7 @@ namespace CafeteriaApi.Services
                 throw new Exception("La caja ya está cerrada");
 
             // Calcular monto esperado (inicial + pedidos completados desde apertura)
-            var fechaApertura = cierreCaja.FechaApertura.Date;
+            var fechaApertura = DateTime.SpecifyKind(cierreCaja.FechaApertura.Date, DateTimeKind.Utc);
             var montoVentas = await _reporteServicio.ObtenerIngresoTotalAsync(fechaApertura, DateTime.UtcNow);
 
             var montoEsperado = cierreCaja.MontoInicial + montoVentas;
@@ -97,9 +97,13 @@ namespace CafeteriaApi.Services
 
         public async Task<List<CierreCajaDto>> ObtenerCierresPorFechaAsync(DateTime fecha)
         {
+            // Convertir la fecha a UTC para compatibilidad con PostgreSQL
+            var fechaUtc = DateTime.SpecifyKind(fecha.Date, DateTimeKind.Utc);
+            var fechaSiguienteUtc = fechaUtc.AddDays(1);
+            
             var cierres = await _context.CierresCaja
                 .Include(c => c.Cajero)
-                .Where(c => c.FechaApertura.Date == fecha.Date)
+                .Where(c => c.FechaApertura >= fechaUtc && c.FechaApertura < fechaSiguienteUtc)
                 .ToListAsync();
 
             return cierres.Select(c => MapearADto(c)).ToList();
